@@ -1,0 +1,12 @@
+//package com.github.usmanovbf.server.rules;
+
+import com.github.usmanovbf.server.api.EventDto;
+rule "temperature"
+dialect "java"
+
+when
+    event : EventDto( temperature >= 20 )
+then
+    System.out.println("The temperature "+ event.getTemperature()+" is higher than critical (20'C)!");
+ end
+
