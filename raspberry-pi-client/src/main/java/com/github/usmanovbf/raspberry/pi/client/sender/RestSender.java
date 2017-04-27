@@ -1,18 +1,18 @@
 package com.github.usmanovbf.raspberry.pi.client.sender;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.usmanovbf.raspberry.pi.client.AppProperties;
 import com.github.usmanovbf.raspberry.pi.client.collector.Collector;
 import com.github.usmanovbf.server.api.EventDto;
+import org.jboss.resteasy.client.ClientRequest;
+import org.jboss.resteasy.client.ClientResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -22,21 +22,59 @@ public class RestSender {
     public void send() {
         logger.info( "RestSender.send started" );
 
-        Client client = ClientBuilder.newClient();
-        logger.info( "RestSender.send.client created" );
+//        Client client = ClientBuilder.newClient();
+//        logger.info( "RestSender.send.client created" );
+//
+//        WebTarget target = client.target( "http://localhost:8080/server/rest/reciever/event" );
+//        logger.info( "RestSender.send.target created" );
+//
+//        EventDto eventDto = collectEvent();
+//        logger.info( "RestSender.send.eventDto created: " + eventDto.toString() );
+//
+//        Response response = target.request().post( Entity.entity( eventDto, MediaType.APPLICATION_JSON ) );
+//        logger.info( "RestSender.send.response created" );
+//
+//        response.close();
+//        logger.info( "RestSender.send.response closed" );
 
-        WebTarget target = client.target( "http://localhost:8080/server/rest/reciever/event" );
-        logger.info( "RestSender.send.target created" );
+        try {
 
-        EventDto eventDto = collectEvent();
-        logger.info( "RestSender.send.eventDto created: " + eventDto.toString() );
+            ClientRequest request = new ClientRequest(
+                    "http://localhost:8080/server/rest/reciever/event" );
+            request.accept( "application/json" );
+            logger.info( "RestSender.request created" );
 
-        Response response = target.request().post( Entity.entity( eventDto, MediaType.APPLICATION_JSON_TYPE ) );
-        logger.info( "RestSender.send.response created" );
+            ObjectMapper mapper = new ObjectMapper();
+            EventDto eventDto = collectEvent();
+            logger.info( "RestSender.send.eventDto created: " + eventDto.toString() );
 
-        response.close();
-        logger.info( "RestSender.send.response closed" );
+            String input = mapper.writeValueAsString( eventDto );
+            logger.info( "RestSender.send.input created: " + input );
 
+            request.body( "application/json", input );
+
+            ClientResponse<String> response = request.post( String.class );
+
+            if (response.getStatus() != 201) {
+                throw new RuntimeException( "Failed : HTTP error code : "
+                        + response.getStatus() );
+            }
+
+            BufferedReader br = new BufferedReader( new InputStreamReader(
+                    new ByteArrayInputStream( response.getEntity().getBytes() ) ) );
+
+            String output;
+            logger.info( "Output from Server .... \n" );
+            while (( output = br.readLine() ) != null) {
+
+                logger.info( output );
+            }
+
+        } catch (Exception e) {
+
+            logger.error( "Error", e );
+
+        }
     }
 
     private EventDto collectEvent() {
