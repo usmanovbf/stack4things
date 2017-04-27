@@ -10,15 +10,22 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 public class Collector {
-    private Logger logger = LoggerFactory.getLogger( Collector.class );
+    private static Logger logger = LoggerFactory.getLogger( Collector.class );
 
-    public Collector() {
+
+    static {
         try {
             PlatformManager.setPlatform( Platform.RASPBERRYPI );
         } catch (PlatformAlreadyAssignedException e) {
             logger.error( "Error while setting platform version", e );
         }
+
     }
+
+
+    public Collector() {
+    }
+
     public float getTemperature() {
         float cpuTemperature = 40;
         try {
