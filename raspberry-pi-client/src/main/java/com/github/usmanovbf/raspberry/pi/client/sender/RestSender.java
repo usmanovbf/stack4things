@@ -55,11 +55,6 @@ public class RestSender {
 
             ClientResponse<String> response = request.post( String.class );
 
-            if (response.getStatus() != 201 || response.getStatus() != 200) {
-                throw new RuntimeException( "Failed : HTTP error code : "
-                        + response.getStatus() );
-            }
-
             try (BufferedReader br = new BufferedReader( new InputStreamReader(
                     new ByteArrayInputStream( response.getEntity().getBytes() ) ) )) {
 
