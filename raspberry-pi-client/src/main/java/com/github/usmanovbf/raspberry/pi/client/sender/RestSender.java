@@ -25,7 +25,7 @@ public class RestSender {
         Client client = ClientBuilder.newClient();
         logger.info( "RestSender.send.client created" );
 
-        WebTarget target = client.target( "http://foo.com/resource" );
+        WebTarget target = client.target( "http://localhost:8080/server/rest/reciever/event" );
         logger.info( "RestSender.send.target created" );
 
         EventDto eventDto = collectEvent();
